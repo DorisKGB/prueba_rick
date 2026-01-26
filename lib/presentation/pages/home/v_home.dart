@@ -58,7 +58,7 @@ class _VHomeState extends State<VHome> {
                         stream: bloc.outSelectedStatusInput,
                         builder: (context, asyncSnapshot) {
                           return DropdownButtonFormField<String?>(
-                            initialValue: null,
+                            initialValue: asyncSnapshot.data,
                             decoration: InputDecoration(
                               labelText: 'Status',
                               labelStyle: context.body1,
@@ -83,15 +83,15 @@ class _VHomeState extends State<VHome> {
                       child: StreamBuilder(
                         stream: bloc.outSelectedGenderInput,
                         builder: (context, asyncSnapshot) {
-                          return DropdownButtonFormField<String?>(
-                            initialValue: null,
+                          return DropdownButtonFormField<String?>(                                                        
+                            initialValue: asyncSnapshot.data,                            
                             decoration: InputDecoration(labelText: 'Gender', labelStyle: context.body1, border: OutlineInputBorder()),
                             items: CStatusGender.values.map((gender) {
                               return DropdownMenuItem(
                                 value: gender.name,
                                 child: Text(gender.name),
                               );
-                            }).toList(),
+                            }).toList(),                            
                             onChanged: (value) {
                               bloc.inSelectedGenderInput(value!);
                               bloc.setFilter();
@@ -135,8 +135,8 @@ class _VHomeState extends State<VHome> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: ()=> bloc.setFilter(), 
-                  child: Text('Apply Filters', style: context.body1)
+                  onPressed: ()=> bloc.resetFilter(), 
+                  child: Text('Reset filters', style: context.body1)
                 ),
               ],
             ),

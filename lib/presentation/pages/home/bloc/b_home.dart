@@ -16,6 +16,7 @@ class BHome extends BlocBase {
   @override
   void dispose() {
     _page.close();
+
   }
 
   final _page = BehaviorSubject<EPage<ECharacter>>();
@@ -30,23 +31,23 @@ class BHome extends BlocBase {
   Stream<EPage<ECharacter>> get outPage => _page.stream;
 
   final _searchInput = BehaviorSubject<String>();
-  String get searchInput => _searchInput.value;
+  String get searchInput => _searchInput.valueOrNull?? '';
   Function(String) get inSearchInput => _searchInput.sink.add;
   Stream<String> get outSearchInput => _searchInput.stream.doOnData((String onData){
     setFilter();
   });
 
-  final _selectedGenderInput = BehaviorSubject<String>.seeded('');
-  String get selectedGenderInput => _selectedGenderInput.valueOrNull?? '';
-  Function(String) get inSelectedGenderInput => _selectedGenderInput.sink.add;
-  Stream<String> get outSelectedGenderInput => _selectedGenderInput.stream.doOnData((String onData){
+  final _selectedGenderInput = BehaviorSubject<String?>();
+  String? get selectedGenderInput => _selectedGenderInput.valueOrNull;
+  Function(String?) get inSelectedGenderInput => _selectedGenderInput.sink.add;
+  Stream<String?> get outSelectedGenderInput => _selectedGenderInput.stream.doOnData((String? onData){
     setFilter();
   });
 
-  final _selectedStatusInput = BehaviorSubject<String>.seeded('');
-  String get selectedStatusInput => _selectedStatusInput.valueOrNull?? '';
-  Function(String) get inSelectedStatusInput => _selectedStatusInput.sink.add;
-  Stream<String> get outSelectedStatusInput => _selectedStatusInput.stream.doOnData((String onData){
+  final _selectedStatusInput = BehaviorSubject<String?>();
+  String? get selectedStatusInput => _selectedStatusInput.valueOrNull;
+  Function(String?) get inSelectedStatusInput => _selectedStatusInput.sink.add;
+  Stream<String?> get outSelectedStatusInput => _selectedStatusInput.stream.doOnData((String? onData){
     setFilter();
   });
 
@@ -87,5 +88,18 @@ class BHome extends BlocBase {
       _page.addError(e.toString());
     }
   }
-
+  
+  Future<void> resetFilter() async {
+    try {
+      final filter = ECharacter();
+      inSearchInput('');
+      inSelectedGenderInput(null);
+      inSelectedStatusInput(null);
+      inSelectedSpeciesInput('');
+      inSelectedTypeInput('');
+      await searchCharacter(filter);      
+    } catch (e) {
+      _page.addError(e.toString());
+    }
+  }
 }
