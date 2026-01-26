@@ -70,7 +70,7 @@ class BHome extends BlocBase {
       inPage(result);
       
     } catch (e) {
-      Future.error(e);
+      _page.addError(e.toString());
     }
   }
   Future<void> setFilter() async {
@@ -84,7 +84,8 @@ class BHome extends BlocBase {
       ;
       await searchCharacter(filter);      
     } catch (e) {
-      Future.error(e);
+      _page.addError(e.toString());
     }
   }
+
 }

@@ -31,7 +31,9 @@ class RCharacterImp implements RCharacter {
     } catch (e) {
       //final message = response?.data?['data']['message'];
       if (e is DioException) {
-        return Future.error(e.response?.data['message']);
+        if(e.response?.statusCode == 404){
+          return Future.error('No se encontro ningun resultado');
+        }
       }
       return Future.error('Ocurrio un error inesperado');
     }
