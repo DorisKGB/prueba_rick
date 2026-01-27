@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:prueba_rick/infraestructure/remote/api/simple_cache_interceptor.dart';
 
 enum BaseUrlApi { rick, labelary }
 
@@ -56,6 +57,7 @@ class Api {
     Duration? receiveTimeout,
   }) async {
     final Dio dio = Dio();
+    dio.interceptors.add(SimpleCacheInterceptor());
     dio.options = await _generateBaseOptions(
       authorization,
       urlApi,
