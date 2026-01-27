@@ -3,4 +3,7 @@ import 'package:prueba_rick/core/entities/e_page.dart';
 
 abstract class MCharacter {
   Future<EPage<ECharacter>> searchCharacter(ECharacter param);
+
+  Future<EPage<ECharacter>> getCharacters();
+  Future<EPage<ECharacter>> getCharactersPage(String param);
 }

@@ -4,11 +4,11 @@ import 'package:prueba_rick/core/entities/e_character.dart';
 import 'package:prueba_rick/core/entities/e_page.dart';
 import 'package:prueba_rick/application/utils/debouncer.dart';
 
-class UCSearchCaracter extends UseCase<ECharacter, EPage<ECharacter>> {
+class UCSearchCharacter extends UseCase<ECharacter, EPage<ECharacter>> {
   final RCharacter _rlCharacter;
   final Debouncer<EPage<ECharacter>> _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
 
-  UCSearchCaracter({required RCharacter rlCharacter})
+  UCSearchCharacter({required RCharacter rlCharacter})
       : _rlCharacter = rlCharacter;
 
   @override

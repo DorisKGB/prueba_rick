@@ -1,5 +1,7 @@
 import 'package:bpstate/bpstate.dart';
 import 'package:flutter/material.dart';
+import 'package:prueba_rick/core/entities/e_character.dart';
+import 'package:prueba_rick/core/entities/e_page.dart';
 import 'package:prueba_rick/core/enum/c_status_gender.dart';
 import 'package:prueba_rick/core/enum/c_status_options.dart';
 import 'package:prueba_rick/presentation/pages/home/bloc/b_home.dart';
@@ -15,203 +17,270 @@ class VHome extends StatefulWidget {
 
 class _VHomeState extends State<VHome> {
   late BHome bloc;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     bloc = BlocProvider.of<BHome>(context);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 100) {
+      bloc.loadNextPage();
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
+    _scrollController.removeListener(_onScroll);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Character Search'),
-      ),
+      appBar: AppBar(title: const Text('Character Search')),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                SWInput(
-                  outData: bloc.outSearchInput,
-                  inData: bloc.inSearchInput,
+          FiltersSection(bloc: bloc),
+          const Divider(),
+          Expanded(
+            child: StreamBuilder<EPage<ECharacter>?>(
+              stream: bloc.outPage,
+              builder: (context, asyncSnapshot) {
+                if (asyncSnapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          asyncSnapshot.error.toString(),
+                          style: context.body1.copyWith(
+                            color: context.colors.neutral3,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => bloc.getCharacters(),
+                          child: Text(
+                            'Retry',
+                            style: context.body1.copyWith(
+                              color: context.colors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                if (asyncSnapshot.connectionState == ConnectionState.waiting ||
+                    asyncSnapshot.data == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final List<ECharacter>? results = asyncSnapshot.data!.results;
+                if (results == null || results.isEmpty) {
+                  return const Center(child: Text('No results found'));
+                }
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await bloc.getCharacters();
+                  },
+                  child: GridView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.8,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                    itemCount: results.length,
+                    itemBuilder: (context, index) {
+                      final character = results[index];
+                      return Card(
+                        clipBehavior: Clip.antiAlias,
+                        elevation: 4,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: character.image != null
+                                  ? Image.network(
+                                      character.image!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.broken_image,
+                                                size: 50,
+                                              ),
+                                    )
+                                  : const Icon(Icons.person, size: 50),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                character.name ?? 'Unknown',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
+          StreamBuilder<bool>(
+            stream: bloc.outLoading,
+            builder: (context, asyncSnapshot) {
+              if (asyncSnapshot.hasData && asyncSnapshot.data == true) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    'Uploading more characters...',
+                    style: context.body1.copyWith(
+                      color: context.colors.neutral5,
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class FiltersSection extends StatelessWidget {
+  const FiltersSection({super.key, required this.bloc});
+
+  final BHome bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          SWInput(
+            outData: bloc.outSearchInput,
+            inData: bloc.inSearchInput,
+            decoration: (error) => InputDecoration(
+              labelText: 'Search by Name',
+              labelStyle: context.body1,
+              border: const OutlineInputBorder(),
+              errorText: error,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+              Expanded(
+                child: StreamBuilder(
+                  stream: bloc.outSelectedStatusInput,
+                  builder: (context, asyncSnapshot) {
+                    return DropdownButtonFormField<String?>(
+                      initialValue: asyncSnapshot.data,
+                      decoration: InputDecoration(
+                        labelText: 'Status',
+                        labelStyle: context.body1,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: CStatusOptions.values.map((status) {
+                        return DropdownMenuItem(
+                          value: status.name,
+                          child: Text(status.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        bloc.inSelectedStatusInput(value!);
+                        bloc.setFilter();
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: StreamBuilder(
+                  stream: bloc.outSelectedGenderInput,
+                  builder: (context, asyncSnapshot) {
+                    return DropdownButtonFormField<String?>(
+                      initialValue: asyncSnapshot.data,
+                      decoration: InputDecoration(
+                        labelText: 'Gender',
+                        labelStyle: context.body1,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: CStatusGender.values.map((gender) {
+                        return DropdownMenuItem(
+                          value: gender.name,
+                          child: Text(gender.name),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        bloc.inSelectedGenderInput(value!);
+                        bloc.setFilter();
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          Row(
+            children: [
+              Expanded(
+                child: SWInput(
+                  outData: bloc.outSelectedSpeciesInput,
+                  inData: bloc.inSelectedSpeciesInput,
                   decoration: (error) => InputDecoration(
-                    labelText: 'Search by Name',
+                    labelText: 'Species',
                     labelStyle: context.body1,
                     border: const OutlineInputBorder(),
                     errorText: error,
                   ),
                 ),
-                const SizedBox(height: 10),
-                
-                Row(
-                  children: [
-                    Expanded(
-                      child: StreamBuilder(
-                        stream: bloc.outSelectedStatusInput,
-                        builder: (context, asyncSnapshot) {
-                          return DropdownButtonFormField<String?>(
-                            initialValue: asyncSnapshot.data,
-                            decoration: InputDecoration(
-                              labelText: 'Status',
-                              labelStyle: context.body1,
-                              border: OutlineInputBorder(),
-                            ),
-                            items: CStatusOptions.values.map((status) {
-                              return DropdownMenuItem(
-                                value: status.name,
-                                child: Text(status.name),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              bloc.inSelectedStatusInput(value!);
-                              bloc.setFilter();
-                            },
-                          );
-                        }
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: StreamBuilder(
-                        stream: bloc.outSelectedGenderInput,
-                        builder: (context, asyncSnapshot) {
-                          return DropdownButtonFormField<String?>(                                                        
-                            initialValue: asyncSnapshot.data,                            
-                            decoration: InputDecoration(labelText: 'Gender', labelStyle: context.body1, border: OutlineInputBorder()),
-                            items: CStatusGender.values.map((gender) {
-                              return DropdownMenuItem(
-                                value: gender.name,
-                                child: Text(gender.name),
-                              );
-                            }).toList(),                            
-                            onChanged: (value) {
-                              bloc.inSelectedGenderInput(value!);
-                              bloc.setFilter();
-                            },
-                          );
-                        }
-                      ),
-                    ),
-                  ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: SWInput(
+                  outData: bloc.outSelectedTypeInput,
+                  inData: bloc.inSelectedTypeInput,
+                  decoration: (error) => InputDecoration(
+                    labelText: 'Type',
+                    labelStyle: context.body1,
+                    border: const OutlineInputBorder(),
+                    errorText: error,
+                  ),
                 ),
-                const SizedBox(height: 10),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: SWInput(
-                        outData: bloc.outSelectedSpeciesInput,
-                        inData: bloc.inSelectedSpeciesInput,
-                        decoration: (error) => InputDecoration(
-                          labelText: 'Species',
-                          labelStyle: context.body1,
-                          border: const OutlineInputBorder(),
-                          errorText: error,
-                        ),                        
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: SWInput(
-                        outData: bloc.outSelectedTypeInput,
-                        inData: bloc.inSelectedTypeInput,
-                        decoration: (error) => InputDecoration(
-                          labelText: 'Type',
-                          labelStyle: context.body1,
-                          border: const OutlineInputBorder(),
-                          errorText: error,
-                        )
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: ()=> bloc.resetFilter(), 
-                  child: Text('Reset filters', style: context.body1)
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          
-          const Divider(),
-
-          Expanded(
-            child: StreamBuilder(
-              stream: bloc.outPage,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.hasError) {
-                  return Center(
-                    child: Text(asyncSnapshot.error.toString()),
-                  );
-                } else if (asyncSnapshot.hasData) {
-                  final results = asyncSnapshot.data!.results;
-                  if (results != null && results.isNotEmpty) {
-                    return GridView.builder(
-                      padding: const EdgeInsets.all(8.0),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.8,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: results.length,
-                      itemBuilder: (context, index) {
-                        final character = results[index];
-                        return Card(
-                          clipBehavior: Clip.antiAlias,
-                          elevation: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(
-                                child: character.image != null
-                                    ? Image.network(
-                                        character.image!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            const Icon(Icons.broken_image, size: 50),
-                                      )
-                                    : const Icon(Icons.person, size: 50),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  character.name ?? 'Unknown',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    return const Center(
-                      child: Text('No characters found'),
-                    );
-                  }
-                } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              },
-            ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () => bloc.resetFilter(),
+            child: Text('Reset filters', style: context.body1),
           ),
         ],
       ),

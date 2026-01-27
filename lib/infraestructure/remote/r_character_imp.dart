@@ -38,8 +38,44 @@ class RCharacterImp implements RCharacter {
       return Future.error('Ocurrio un error inesperado');
     }
   }
+  
+  @override
+  Future<EPage<ECharacter>> getCharacters() async {
+    try {
+      final Response<Map<String, dynamic>> response = await _api.get(path: 'character');
+
+      return EPageFromData().transform(response.data);
+    } catch (e) {
+      if (e is DioException) {
+        if(e.response?.statusCode == 404){
+          return Future.error('No se encontro ningun resultado');
+        }
+        if(e.response?.statusCode == 429){
+          return Future.error('Demasiados intentos');
+        }          
+      }
+      return Future.error('Ocurrio un error inesperado');      
+    }
+  }
+  
+  @override
+  Future<EPage<ECharacter>> getCharactersPage(String param) async {
+    try {
+      final Response<Map<String, dynamic>> response = await _api.get(path: param);
+
+      return EPageFromData().transform(response.data);
+    } catch (e) {
+      if (e is DioException) {
+        if(e.response?.statusCode == 404){
+          return Future.error('No se encontro ningun resultado');
+        }
+        if(e.response?.statusCode == 429){
+          return Future.error('Demasiados intentos');
+        }        
+      }
+      return Future.error('Ocurrio un error inesperado');      
+    }
+  }
+
+  
 }
-/* //This exception was thrown because the response has a status code of 404 and RequestOptions.validateStatus was configured to throw for this status code.
-The status code of 404 has the following meaning: "Client error - the request contains bad syntax or cannot be fulfilled"
-Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code. */

@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:prueba_rick/application/repository/remote/r_character.dart';
 import 'package:prueba_rick/application/manager/adapters/m_character.dart';
 import 'package:prueba_rick/application/manager/m_character.dart';
-import 'package:prueba_rick/application/use_cases/character/uc_search_caracter.dart';
+import 'package:prueba_rick/application/use_cases/character/uc_get_characters.dart';
+import 'package:prueba_rick/application/use_cases/character/uc_get_characters_page.dart';
+import 'package:prueba_rick/application/use_cases/character/uc_search_character.dart';
 import 'package:prueba_rick/infraestructure/remote/r_character_imp.dart';
 import 'package:prueba_rick/presentation/bloc_application/b_application.dart';
 import 'package:prueba_rick/presentation/bloc_application/blocs/b_user.dart';
@@ -41,8 +43,10 @@ class MyServiceLocator extends ServiceLocator<GoRouter> {
   RCharacter get _rCharacter => RCharacterImp(api: api);
 
   // ----------------------------- manager
-  MCharacter get _mCharacter => MCharacterImp(ucSearchCaracter: _ucSearchCaracter);
+  MCharacter get _mCharacter => MCharacterImp(ucSearchCaracter: _ucSearchCaracter, ucGetCharacters: _ucGetCharacters, ucGetCharactersPage: _ucGetCharactersPage);
 
   // ----------------------------- use case
-  UCSearchCaracter get _ucSearchCaracter => UCSearchCaracter(rlCharacter: _rCharacter);
+  UCSearchCharacter get _ucSearchCaracter => UCSearchCharacter(rlCharacter: _rCharacter);
+  UCGetCharacters get _ucGetCharacters => UCGetCharacters(rlCharacter: _rCharacter);
+  UCGetCharactersPage get _ucGetCharactersPage => UCGetCharactersPage(rCharacter: _rCharacter);
 }

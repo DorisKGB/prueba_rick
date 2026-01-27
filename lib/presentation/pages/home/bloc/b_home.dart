@@ -10,25 +10,25 @@ class BHome extends BlocBase {
   final MCharacter mCharacter; 
 
   BHome({required this.mCharacter}){
-    searchCharacter(ECharacter());
+    getCharacters();
   }
 
   @override
   void dispose() {
     _page.close();
-
+    _searchInput.close();
+    _selectedGenderInput.close();
+    _selectedStatusInput.close();
+    _selectedSpeciesInput.close();
+    _selectedTypeInput.close();
+    _isLoading.close();
+    
   }
 
-  final _page = BehaviorSubject<EPage<ECharacter>>();
-  EPage<ECharacter> get page => _page.valueOrNull ?? EPage(
-    count: 0,
-    pages: 0,
-    next: '',
-    prev: '',
-    results: [],
-  );
-  Function(EPage<ECharacter>) get inPage => _page.sink.add;
-  Stream<EPage<ECharacter>> get outPage => _page.stream;
+  final _page = BehaviorSubject<EPage<ECharacter>?>();
+  EPage<ECharacter>? get page => _page.valueOrNull;
+  Function(EPage<ECharacter>?) get inPage => _page.sink.add;
+  Stream<EPage<ECharacter>?> get outPage => _page.stream;
 
   final _searchInput = BehaviorSubject<String>();
   String get searchInput => _searchInput.valueOrNull?? '';
@@ -65,15 +65,11 @@ class BHome extends BlocBase {
     setFilter();
   });
 
-  Future<void> searchCharacter(ECharacter param) async {
-    try {      
-      final result= await mCharacter.searchCharacter(param);
-      inPage(result);
-      
-    } catch (e) {
-      _page.addError(e.toString());
-    }
-  }
+  final _isLoading = BehaviorSubject<bool>.seeded(false);
+  bool get isLoading => _isLoading.valueOrNull?? false;
+  Function(bool) get inLoading => _isLoading.sink.add;
+  Stream<bool> get outLoading => _isLoading.stream;
+
   Future<void> setFilter() async {
     try {
       final filter = ECharacter()
@@ -88,6 +84,17 @@ class BHome extends BlocBase {
       _page.addError(e.toString());
     }
   }
+
+  Future<void> searchCharacter(ECharacter param) async {
+    try {   
+      inPage(null);
+      final result= await mCharacter.searchCharacter(param);
+      inPage(result);
+      
+    } catch (e) {
+      _page.addError(e.toString());
+    }
+  }  
   
   Future<void> resetFilter() async {
     try {
@@ -100,6 +107,34 @@ class BHome extends BlocBase {
       await searchCharacter(filter);      
     } catch (e) {
       _page.addError(e.toString());
+    }
+  }
+
+  Future<void> getCharacters() async {
+    try {
+      final result= await mCharacter.getCharacters();
+      inPage(result);      
+    } catch (e) {
+      _page.addError(e.toString());
+    }
+  }
+  Future<void> loadNextPage() async {
+    try {
+      if (page?.next == null) return;
+      if (isLoading) return;
+      inLoading(true);
+      final EPage<ECharacter> result = await mCharacter.getCharactersPage(page!.next!);
+      final List<ECharacter> currentResults = page!.results ?? [];
+      final List<ECharacter> newResults = result.results ?? [];
+      
+      result.results = [...currentResults, ...newResults];
+      inPage(result);
+      await Future.delayed(const Duration(seconds: 10));
+      inLoading(false);
+    } catch (e) {
+      _page.addError(e.toString());
+      await Future.delayed(const Duration(seconds: 3));
+      inLoading(false);
     }
   }
 }
