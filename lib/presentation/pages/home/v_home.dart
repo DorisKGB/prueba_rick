@@ -5,6 +5,8 @@ import 'package:prueba_rick/core/entities/e_page.dart';
 import 'package:prueba_rick/core/enum/c_status_gender.dart';
 import 'package:prueba_rick/core/enum/c_status_options.dart';
 import 'package:prueba_rick/presentation/pages/home/bloc/b_home.dart';
+import 'package:prueba_rick/presentation/pages/home/widget/character_detail.dart';
+import 'package:prueba_rick/presentation/pages/home/widget/filters_section.dart';
 import 'package:prueba_rick/presentation/utils/extension/extension_build_context.dart';
 import 'package:prueba_rick/presentation/utils/widgets/sw_input.dart';
 
@@ -46,7 +48,7 @@ class _VHomeState extends State<VHome> {
       appBar: AppBar(title: const Text('Character Search')),
       body: Column(
         children: [
-          FiltersSection(bloc: bloc),
+          FiltersSection(),
           const Divider(),
           Expanded(
             child: StreamBuilder<EPage<ECharacter>?>(
@@ -105,37 +107,40 @@ class _VHomeState extends State<VHome> {
                       return Card(
                         clipBehavior: Clip.antiAlias,
                         elevation: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: character.image != null
-                                  ? Image.network(
-                                      character.image!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(
-                                                Icons.broken_image,
-                                                size: 50,
-                                              ),
-                                    )
-                                  : const Icon(Icons.person, size: 50),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                character.name ?? 'Unknown',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                        child: InkWell(
+                          onTap: () => _showCharacterDetail(context, character),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: character.image != null
+                                    ? Image.network(
+                                        character.image!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.broken_image,
+                                                  size: 50,
+                                                ),
+                                      )
+                                    : const Icon(Icons.person, size: 50),
                               ),
-                            ),
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  character.name ?? 'Unknown',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -166,124 +171,17 @@ class _VHomeState extends State<VHome> {
       ),
     );
   }
-}
 
-class FiltersSection extends StatelessWidget {
-  const FiltersSection({super.key, required this.bloc});
-
-  final BHome bloc;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          SWInput(
-            outData: bloc.outSearchInput,
-            inData: bloc.inSearchInput,
-            decoration: (error) => InputDecoration(
-              labelText: 'Search by Name',
-              labelStyle: context.body1,
-              border: const OutlineInputBorder(),
-              errorText: error,
-            ),
-          ),
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              Expanded(
-                child: StreamBuilder(
-                  stream: bloc.outSelectedStatusInput,
-                  builder: (context, asyncSnapshot) {
-                    return DropdownButtonFormField<String?>(
-                      initialValue: asyncSnapshot.data,
-                      decoration: InputDecoration(
-                        labelText: 'Status',
-                        labelStyle: context.body1,
-                        border: OutlineInputBorder(),
-                      ),
-                      items: CStatusOptions.values.map((status) {
-                        return DropdownMenuItem(
-                          value: status.name,
-                          child: Text(status.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        bloc.inSelectedStatusInput(value!);
-                        bloc.setFilter();
-                      },
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: StreamBuilder(
-                  stream: bloc.outSelectedGenderInput,
-                  builder: (context, asyncSnapshot) {
-                    return DropdownButtonFormField<String?>(
-                      initialValue: asyncSnapshot.data,
-                      decoration: InputDecoration(
-                        labelText: 'Gender',
-                        labelStyle: context.body1,
-                        border: OutlineInputBorder(),
-                      ),
-                      items: CStatusGender.values.map((gender) {
-                        return DropdownMenuItem(
-                          value: gender.name,
-                          child: Text(gender.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        bloc.inSelectedGenderInput(value!);
-                        bloc.setFilter();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          Row(
-            children: [
-              Expanded(
-                child: SWInput(
-                  outData: bloc.outSelectedSpeciesInput,
-                  inData: bloc.inSelectedSpeciesInput,
-                  decoration: (error) => InputDecoration(
-                    labelText: 'Species',
-                    labelStyle: context.body1,
-                    border: const OutlineInputBorder(),
-                    errorText: error,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: SWInput(
-                  outData: bloc.outSelectedTypeInput,
-                  inData: bloc.inSelectedTypeInput,
-                  decoration: (error) => InputDecoration(
-                    labelText: 'Type',
-                    labelStyle: context.body1,
-                    border: const OutlineInputBorder(),
-                    errorText: error,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () => bloc.resetFilter(),
-            child: Text('Reset filters', style: context.body1),
-          ),
-        ],
+  void _showCharacterDetail(BuildContext context, ECharacter character) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (context) {
+        return CharacterDetail(character: character);
+      },
     );
   }
 }
