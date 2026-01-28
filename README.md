@@ -26,7 +26,7 @@ Aplicación Flutter que permite explorar y buscar personajes de la serie Rick & 
 
 1. **Clonar el repositorio**
    ```bash
-   git clone <url-del-repositorio>
+   git clone https://github.com/DorisKGB/prueba_rick.git
    cd prueba_rick
    ```
 
