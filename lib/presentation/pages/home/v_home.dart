@@ -1,4 +1,5 @@
 import 'package:bpstate/bpstate.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:prueba_rick/core/entities/e_character.dart';
 import 'package:prueba_rick/core/entities/e_page.dart';
@@ -274,10 +275,10 @@ class _VHomeState extends State<VHome> {
                 fit: StackFit.expand,
                 children: [
                   character.image != null
-                      ? Image.network(
-                          character.image!,
+                      ? CachedNetworkImage(
+                          imageUrl: character.image!,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
+                          errorWidget: (context, error, stackTrace) =>
                               Container(
                                 color: context.colors.neutral2,
                                 child: Icon(

@@ -129,11 +129,9 @@ class BHome extends BlocBase {
       
       result.results = [...currentResults, ...newResults];
       inPage(result);
-      await Future.delayed(const Duration(seconds: 3));
       inLoading(false);
     } catch (e) {
       _page.addError(e.toString());
-      await Future.delayed(const Duration(seconds: 3));
       inLoading(false);
     }
   }

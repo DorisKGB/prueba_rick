@@ -16,6 +16,7 @@ dependencies:
   go_router: ^14.6.3  
   dio: ^5.7.0
   rxdart: ^0.28.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

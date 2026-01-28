@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:prueba_rick/core/entities/e_character.dart';
 import 'package:prueba_rick/presentation/utils/extension/extension_build_context.dart';
@@ -55,10 +56,10 @@ class CharacterDetail extends StatelessWidget {
                             ),
                             child: ClipOval(
                               child: character.image != null
-                                  ? Image.network(
-                                      character.image!,
+                                  ? CachedNetworkImage(
+                                      imageUrl: character.image!,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) =>
+                                      errorWidget: (context, error, stackTrace) =>
                                           Container(
                                             color: Colors.grey[200],
                                             child: const Icon(
