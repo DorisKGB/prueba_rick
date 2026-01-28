@@ -54,6 +54,13 @@ class AppStyle with AppTypography {
         textStyle: AppTypography.button,
       ),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: appColors.primary,
+        textStyle: AppTypography.button,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
     cardTheme: CardThemeData(
       color: appColors.neutral,
       shadowColor: appColors.neutral3,

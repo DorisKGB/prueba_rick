@@ -53,7 +53,8 @@ class FiltersSection extends StatelessWidget {
                   stream: bloc.outSelectedStatusInput,
                   builder: (context, asyncSnapshot) {
                     return DropdownButtonFormField<String?>(
-                      value: asyncSnapshot.data,
+                      initialValue: asyncSnapshot.data,
+                      hint: Text('Status'),
                       decoration: InputDecoration(
                         labelText: 'Status',
                         labelStyle: context.body1,
@@ -95,7 +96,8 @@ class FiltersSection extends StatelessWidget {
                   stream: bloc.outSelectedGenderInput,
                   builder: (context, asyncSnapshot) {
                     return DropdownButtonFormField<String?>(
-                      value: asyncSnapshot.data,
+                      initialValue: asyncSnapshot.data,                      
+                      hint: Text('Gender'),
                       decoration: InputDecoration(
                         labelText: 'Gender',
                         labelStyle: context.body1,

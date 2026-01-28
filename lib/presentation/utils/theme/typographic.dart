@@ -9,8 +9,8 @@ mixin AppTypography {
   static TextStyle get body2 => TextStyle(fontSize: 12, fontWeight: FontWeight.normal, fontFamily: 'Poppins');
   static TextStyle get body3 => TextStyle(fontSize: 10, fontWeight: FontWeight.normal, fontFamily: 'Poppins');
   static TextStyle get body4 => TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'Poppins');
-  static TextStyle get button => TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: 'Poppins');
-  static TextStyle get button1 => TextStyle(fontSize: 18, fontWeight: FontWeight.normal, fontFamily: 'Poppins');
+  static TextStyle get button => TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins');
+  static TextStyle get button1 => TextStyle(fontSize: 15, fontWeight: FontWeight.normal, fontFamily: 'Poppins');
 }
 
 
