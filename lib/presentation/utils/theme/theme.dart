@@ -5,8 +5,8 @@ import 'typographic.dart';
 
 class AppStyle with AppTypography {
   static const appColors = AppColors(
-    primary: Color(0xFF004899),
-    secondary: Color(0xFFe41520),
+    primary: Color(0xFF00452C),
+    secondary: Color(0xFFFFCE1B),
     neutral: Color.fromRGBO(255, 255, 255, 1),
     neutral1: Color.fromRGBO(234, 234, 234, 1),
     neutral2: Color.fromRGBO(212, 212, 212, 1),

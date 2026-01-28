@@ -14,21 +14,38 @@ class FiltersSection extends StatelessWidget {
     final bloc = BlocProvider.of<BHome>(context);
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Search input
           SWInput(
-            outData:  bloc.outSearchInput,
+            outData: bloc.outSearchInput,
             inData: bloc.inSearchInput,
             decoration: (error) => InputDecoration(
               labelText: 'Search by Name',
               labelStyle: context.body1,
-              border: const OutlineInputBorder(),
+              hintText: 'Enter character name...',
+              prefixIcon: Icon(Icons.search, color: context.colors.primary),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: context.colors.primary, width: 2),
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
               errorText: error,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
 
+          // Status and Gender filters
           Row(
             children: [
               Expanded(
@@ -36,11 +53,27 @@ class FiltersSection extends StatelessWidget {
                   stream: bloc.outSelectedStatusInput,
                   builder: (context, asyncSnapshot) {
                     return DropdownButtonFormField<String?>(
-                      initialValue: asyncSnapshot.data,
+                      value: asyncSnapshot.data,
                       decoration: InputDecoration(
                         labelText: 'Status',
                         labelStyle: context.body1,
-                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.favorite_border, color: context.colors.primary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: context.colors.primary,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
                       ),
                       items: CStatusOptions.values.map((status) {
                         return DropdownMenuItem(
@@ -56,17 +89,33 @@ class FiltersSection extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: StreamBuilder(
                   stream: bloc.outSelectedGenderInput,
                   builder: (context, asyncSnapshot) {
                     return DropdownButtonFormField<String?>(
-                      initialValue: asyncSnapshot.data,
+                      value: asyncSnapshot.data,
                       decoration: InputDecoration(
                         labelText: 'Gender',
                         labelStyle: context.body1,
-                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.wc, color: context.colors.primary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey[300]!),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: context.colors.primary,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
                       ),
                       items: CStatusGender.values.map((gender) {
                         return DropdownMenuItem(
@@ -84,8 +133,9 @@ class FiltersSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
 
+          // Species and Type filters
           Row(
             children: [
               Expanded(
@@ -95,12 +145,29 @@ class FiltersSection extends StatelessWidget {
                   decoration: (error) => InputDecoration(
                     labelText: 'Species',
                     labelStyle: context.body1,
-                    border: const OutlineInputBorder(),
+                    hintText: 'e.g., Human',
+                    prefixIcon: Icon(Icons.science_outlined, color: context.colors.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: context.colors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
                     errorText: error,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: SWInput(
                   outData: bloc.outSelectedTypeInput,
@@ -108,17 +175,55 @@ class FiltersSection extends StatelessWidget {
                   decoration: (error) => InputDecoration(
                     labelText: 'Type',
                     labelStyle: context.body1,
-                    border: const OutlineInputBorder(),
+                    hintText: 'Optional',
+                    prefixIcon: Icon(Icons.category_outlined, color: context.colors.primary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: context.colors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
                     errorText: error,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () => bloc.resetFilter(),
-            child: Text('Reset filters', style: context.body1),
+          const SizedBox(height: 16),
+          
+          // Reset button
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => bloc.resetFilter(),
+              icon: Icon(Icons.menu, color: context.colors.neutral),
+              label: Text(
+                'Reset Filters',
+                style: context.body1.copyWith(
+                  color: context.colors.neutral,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                side: BorderSide(color: context.colors.primary),
+                foregroundColor: context.colors.primary,
+                backgroundColor: context.colors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       ),
